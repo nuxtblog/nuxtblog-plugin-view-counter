@@ -209,7 +209,7 @@ export function handlePostStats(req: PluginRequest): PluginResponse {
 // ── Pipeline: 每日清理过期日志 ──────────────────────────────────────────────
 // 在 package.json pipelines 中声明，或由外部 cron 调用
 
-export function cleanupOldLogs(ctx: StepContext): void {
+export function cleanupOldLogs(_ctx: StepContext): void {
   const retentionDays = (nuxtblog.settings.get('retention_days') as number) || 90
   const cutoff = new Date()
   cutoff.setDate(cutoff.getDate() - retentionDays)
