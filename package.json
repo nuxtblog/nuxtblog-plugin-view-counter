@@ -1,0 +1,152 @@
+{
+  "name": "nuxtblog-plugin-view-counter",
+  "version": "0.1.0",
+  "description": "精准文章浏览量统计。展示 DB Migration + store + 自定义路由 + public_js + 前端页面",
+  "author": "nuxtblog",
+  "license": "MIT",
+  "keywords": [
+    "analytics",
+    "views",
+    "nuxtblog-plugin"
+  ],
+  "private": true,
+  "plugin": {
+    "title": "浏览量统计",
+    "icon": "i-tabler-chart-bar",
+    "minHostVersion": "2.0.0",
+    "sdkVersion": "0.1.0",
+    "trust_level": "official",
+    "entry": "index.js",
+    "public_js": "public.js",
+    "activationEvents": [
+      "onStartup"
+    ],
+    "capabilities": {
+      "store": {
+        "read": true,
+        "write": true
+      },
+      "db": true
+    },
+    "settings": [
+      {
+        "key": "count_mode",
+        "label": "计数模式",
+        "type": "select",
+        "default": "unique_ip",
+        "options": [
+          "every_visit",
+          "unique_ip",
+          "unique_user"
+        ],
+        "description": "every_visit = 每次刷新都计数；unique_ip = 同 IP 24h 内只计一次；unique_user = 登录用户去重",
+        "group": "基础配置"
+      },
+      {
+        "key": "exclude_admin",
+        "label": "排除管理员访问",
+        "type": "boolean",
+        "default": true,
+        "group": "基础配置"
+      },
+      {
+        "key": "retention_days",
+        "label": "详细日志保留天数",
+        "type": "number",
+        "default": 90,
+        "description": "超过此天数的逐条访问日志将被清理（聚合数据永久保留）",
+        "group": "存储"
+      }
+    ],
+    "contributes": {
+      "commands": [
+        {
+          "id": "view-counter:export",
+          "title": "导出浏览数据",
+          "title_en": "Export View Data",
+          "icon": "i-tabler-download"
+        }
+      ],
+      "navigation": [
+        {
+          "slot": "admin:sidebar-nav",
+          "title": "浏览统计",
+          "icon": "i-tabler-chart-bar",
+          "route": "/admin/analytics",
+          "order": 60
+        }
+      ],
+      "menus": {
+        "post-list:row-action": [
+          {
+            "command": "view-counter:export"
+          }
+        ]
+      }
+    },
+    "routes": [
+      {
+        "method": "POST",
+        "path": "/api/plugin/view-counter/track",
+        "fn": "handleTrack",
+        "auth": "public",
+        "description": "记录一次页面浏览（由 public.js 调用）"
+      },
+      {
+        "method": "GET",
+        "path": "/api/plugin/view-counter/stats",
+        "fn": "handleStats",
+        "auth": "admin",
+        "description": "获取浏览统计数据"
+      },
+      {
+        "method": "GET",
+        "path": "/api/plugin/view-counter/post/{id}",
+        "fn": "handlePostStats",
+        "auth": "admin",
+        "description": "获取单篇文章的详细浏览趋势"
+      }
+    ],
+    "migrations": [
+      {
+        "version": 1,
+        "up": "CREATE TABLE plugin_nuxtblog_view_counter_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER NOT NULL, user_id INTEGER DEFAULT 0, ip_hash TEXT NOT NULL, user_agent TEXT, referer TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP);",
+        "down": "DROP TABLE plugin_nuxtblog_view_counter_logs;"
+      },
+      {
+        "version": 2,
+        "up": "CREATE INDEX idx_pvc_logs_post_id ON plugin_nuxtblog_view_counter_logs (post_id); CREATE INDEX idx_pvc_logs_created ON plugin_nuxtblog_view_counter_logs (created_at);",
+        "down": "DROP INDEX idx_pvc_logs_post_id; DROP INDEX idx_pvc_logs_created;"
+      },
+      {
+        "version": 3,
+        "up": "CREATE TABLE plugin_nuxtblog_view_counter_daily (post_id INTEGER NOT NULL, date TEXT NOT NULL, views INTEGER DEFAULT 0, unique_views INTEGER DEFAULT 0, PRIMARY KEY (post_id, date));",
+        "down": "DROP TABLE plugin_nuxtblog_view_counter_daily;"
+      }
+    ],
+    "pages": [
+      {
+        "path": "/admin/analytics",
+        "slot": "admin",
+        "component": "AnalyticsDashboard",
+        "title": "浏览统计",
+        "nav": {
+          "group": "数据",
+          "icon": "i-tabler-chart-bar",
+          "order": 60
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=neutral --target=es2015 --outfile=index.js && esbuild src/public.ts --bundle --platform=browser --target=es2020 --format=iife --outfile=public.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.4",
+    "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "@nuxtblog/plugin-sdk": "^0.1.0"
+  }
+}
