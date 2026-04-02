@@ -1,6 +1,6 @@
 {
   "name": "nuxtblog-plugin-view-counter",
-  "version": "0.1.1",
+  "version": "1.0.1",
   "description": "精准文章浏览量统计。展示 DB Migration + store + 自定义路由 + public_js + 前端页面",
   "author": "nuxtblog",
   "license": "MIT",
