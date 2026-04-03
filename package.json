@@ -1,6 +1,6 @@
 {
   "name": "nuxtblog-plugin-view-counter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "精准文章浏览量统计。展示 DB Migration + store + 自定义路由 + public_js + 前端页面",
   "author": "nuxtblog",
   "license": "MIT",
@@ -13,11 +13,10 @@
   "plugin": {
     "title": "浏览量统计",
     "icon": "i-tabler-chart-bar",
-    "minHostVersion": "2.0.0",
     "sdkVersion": "0.1.0",
     "trust_level": "official",
-    "entry": "index.js",
-    "public_js": "public.js",
+    "entry": "dist/index.js",
+    "public_js": "dist/public.js",
     "activationEvents": [
       "onStartup"
     ],
@@ -139,7 +138,7 @@
     ]
   },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=neutral --target=es2015 --outfile=index.js && esbuild src/public.ts --bundle --platform=browser --target=es2020 --format=iife --outfile=public.js",
+    "build": "esbuild src/index.ts --bundle --platform=neutral --format=cjs --target=es2015 --outfile=dist/index.js && esbuild src/public.ts --bundle --platform=browser --target=es2020 --format=iife --outfile=dist/public.js",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.public.json"
   },
   "devDependencies": {
