@@ -1,6 +1,6 @@
 {
   "name": "nuxtblog-plugin-view-counter",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "精准文章浏览量统计。展示 DB Migration + store + 自定义路由 + public_js + 前端页面",
   "author": "nuxtblog",
   "license": "MIT",
@@ -138,7 +138,7 @@
     ]
   },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=neutral --format=cjs --target=es2015 --outfile=dist/index.js && esbuild src/public.ts --bundle --platform=browser --target=es2020 --format=iife --outfile=dist/public.js",
+    "build": "esbuild src/index.ts --bundle --platform=neutral --format=iife --global-name=__plugin --footer:js=\"Object.keys(__plugin).forEach(function(k){this[k]=__plugin[k]})\" --target=es2015 --outfile=dist/index.js && esbuild src/public.ts --bundle --platform=browser --target=es2020 --format=iife --outfile=dist/public.js",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.public.json"
   },
   "devDependencies": {
