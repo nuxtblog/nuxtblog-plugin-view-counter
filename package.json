@@ -1,6 +1,6 @@
 {
   "name": "nuxtblog-plugin-view-counter",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "精准文章浏览量统计。展示 DB Migration + store + 自定义路由 + public_js + 前端页面",
   "author": "nuxtblog",
   "license": "MIT",
@@ -17,6 +17,7 @@
     "trust_level": "official",
     "entry": "dist/index.js",
     "public_js": "dist/public.js",
+    "admin_js": "dist/admin.mjs",
     "activationEvents": [
       "onStartup"
     ],
@@ -64,15 +65,6 @@
           "title": "导出浏览数据",
           "title_en": "Export View Data",
           "icon": "i-tabler-download"
-        }
-      ],
-      "navigation": [
-        {
-          "slot": "admin:sidebar-nav",
-          "title": "浏览统计",
-          "icon": "i-tabler-chart-bar",
-          "route": "/admin/analytics",
-          "order": 60
         }
       ],
       "menus": {
@@ -138,7 +130,7 @@
     ]
   },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=neutral --format=iife --global-name=__plugin --footer:js=\"for(var __k in __plugin)this[__k]=__plugin[__k]\" --target=es2015 --outfile=dist/index.js && esbuild src/public.ts --bundle --platform=browser --target=es2020 --format=iife --outfile=dist/public.js",
+    "build": "esbuild src/index.ts --bundle --platform=neutral --format=iife --global-name=__plugin --footer:js=\"for(var __k in __plugin)this[__k]=__plugin[__k]\" --target=es2015 --outfile=dist/index.js && esbuild src/public.ts --bundle --platform=browser --target=es2020 --format=iife --outfile=dist/public.js && esbuild src/admin.ts --bundle --platform=browser --target=es2020 --format=esm --outfile=dist/admin.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.public.json"
   },
   "devDependencies": {
