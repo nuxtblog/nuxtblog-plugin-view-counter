@@ -1,0 +1,11 @@
+{
+  "extends": "@nuxtblog/plugin-sdk/tsconfig.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "types": ["@nuxtblog/plugin-sdk"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue"]
+}
