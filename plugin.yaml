@@ -1,7 +1,7 @@
 # nuxtblog plugin manifest — unified config (single source of truth)
 id: nuxtblog-plugin-view-counter
 title: 浏览量统计
-version: 2.0.2
+version: 2.0.3
 icon: i-tabler-chart-bar
 author: nuxtblog
 description: 精准文章浏览量统计与可视化分析

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { UCard, UBadge, UButton, USkeleton, UTabs, UIcon, UAlert } from '@nuxtblog/ui'
 
 const themeTokens = (window as any).__nuxtblog_theme
 const primaryHex = computed(() => themeTokens?.primaryHex || '#8b5cf6')
@@ -21,6 +22,15 @@ const dayOptions = [
   { label: '90 天', value: 90 },
 ]
 
+const tabItems = computed(() =>
+  dayOptions.map(opt => ({ label: opt.label, value: String(opt.value) })),
+)
+
+const selectedTab = computed({
+  get: () => String(days.value),
+  set: (val: string) => { days.value = Number(val) },
+})
+
 const cw = 900
 const ch = 200
 
@@ -40,7 +50,7 @@ const statCards = computed(() => [
     value: totalViews.value,
     color: primaryHex.value,
     bg: primaryHex.value + '1a',
-    iconPath: 'M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z',
+    icon: 'i-heroicons-eye',
     sub: days.value + ' 天内',
   },
   {
@@ -48,21 +58,21 @@ const statCards = computed(() => [
     value: todayViews.value,
     color: cssVar('--color-primary-400', '#10b981'),
     bg: cssVar('--color-primary-400', '#10b981') + '1a',
-    iconPath: 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z',
+    icon: 'i-heroicons-chart-bar',
   },
   {
     label: '日均浏览',
     value: avgDaily.value,
     color: cssVar('--color-primary-600', '#8b5cf6'),
     bg: cssVar('--color-primary-600', '#8b5cf6') + '1a',
-    iconPath: 'M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941',
+    icon: 'i-heroicons-arrow-trending-up',
   },
   {
     label: '日志记录',
     value: stats.value?.total_logs || 0,
     color: cssVar('--color-primary-800', '#f59e0b'),
     bg: cssVar('--color-primary-800', '#f59e0b') + '1a',
-    iconPath: 'M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125',
+    icon: 'i-heroicons-circle-stack',
   },
 ])
 
@@ -196,76 +206,47 @@ onMounted(() => fetchStats())
         <h1 class="text-2xl font-bold text-[var(--ui-text)]">浏览统计</h1>
         <p class="text-sm text-[var(--ui-text-muted)] mt-1">查看博客的浏览量趋势和热门文章</p>
       </div>
-      <div
-        class="flex items-center gap-1 rounded-lg p-1"
-        style="background: var(--ui-bg-elevated)"
-      >
-        <button
-          v-for="opt in dayOptions"
-          :key="opt.value"
-          :class="[
-            'px-3 py-1.5 text-sm font-medium rounded-md transition-all cursor-pointer',
-            days === opt.value
-              ? 'bg-[var(--ui-bg)] text-[var(--ui-text)] shadow-sm'
-              : 'text-[var(--ui-text-muted)] hover:text-[var(--ui-text)]',
-          ]"
-          @click="days = opt.value"
-        >
-          {{ opt.label }}
-        </button>
-      </div>
+      <UTabs
+        v-model="selectedTab"
+        :items="tabItems"
+        size="sm"
+      />
     </div>
 
     <!-- Loading skeleton -->
     <template v-if="loading">
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div
-          v-for="i in 4"
-          :key="i"
-          class="rounded-xl p-5 animate-pulse"
-          style="background: var(--ui-bg-elevated); border: 1px solid var(--ui-border)"
-        >
-          <div class="h-8 w-20 rounded mb-2" style="background: var(--ui-border)" />
-          <div class="h-4 w-16 rounded" style="background: var(--ui-border)" />
+        <UCard v-for="i in 4" :key="i">
+          <div class="space-y-2">
+            <USkeleton class="h-8 w-20" />
+            <USkeleton class="h-4 w-16" />
+          </div>
+        </UCard>
+      </div>
+      <UCard>
+        <div class="space-y-4">
+          <USkeleton class="h-5 w-24" />
+          <USkeleton class="h-48 w-full" />
         </div>
-      </div>
-      <div
-        class="rounded-xl p-6 animate-pulse"
-        style="background: var(--ui-bg-elevated); border: 1px solid var(--ui-border)"
-      >
-        <div class="h-5 w-24 rounded mb-6" style="background: var(--ui-border)" />
-        <div class="h-48 rounded" style="background: var(--ui-border); opacity: 0.5" />
-      </div>
+      </UCard>
     </template>
 
     <!-- Error -->
-    <div
+    <UAlert
       v-else-if="error"
-      class="rounded-xl p-8 text-center"
-      style="background: var(--ui-bg-elevated); border: 1px solid var(--ui-border)"
+      color="error"
+      icon="i-heroicons-exclamation-triangle"
+      :title="error"
     >
-      <svg class="mx-auto mb-3 size-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-      </svg>
-      <p class="text-red-500 mb-3">{{ error }}</p>
-      <button
-        class="px-4 py-2 text-sm rounded-lg transition-colors cursor-pointer"
-        style="background: var(--ui-bg); border: 1px solid var(--ui-border); color: var(--ui-text)"
-        @click="fetchStats"
-      >
-        重试
-      </button>
-    </div>
+      <template #actions>
+        <UButton color="neutral" variant="outline" size="sm" @click="fetchStats">重试</UButton>
+      </template>
+    </UAlert>
 
     <template v-else>
       <!-- Stats Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div
-          v-for="card in statCards"
-          :key="card.label"
-          class="rounded-xl p-4 md:p-5 transition-shadow hover:shadow-md"
-          style="background: var(--ui-bg-elevated); border: 1px solid var(--ui-border)"
-        >
+        <UCard v-for="card in statCards" :key="card.label" class="transition-shadow hover:shadow-md">
           <div class="flex items-start justify-between">
             <div>
               <div
@@ -274,37 +255,34 @@ onMounted(() => fetchStats())
               >
                 {{ formatNumber(card.value) }}
               </div>
-              <div class="text-xs mt-1.5" style="color: var(--ui-text-muted)">{{ card.label }}</div>
+              <div class="text-xs mt-1.5 text-[var(--ui-text-muted)]">{{ card.label }}</div>
             </div>
             <div
               class="size-9 rounded-lg flex items-center justify-center shrink-0"
               :style="{ background: card.bg }"
             >
-              <svg class="size-5" :style="{ color: card.color }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" :d="card.iconPath" />
-              </svg>
+              <UIcon :name="card.icon" class="size-5" :style="{ color: card.color }" />
             </div>
           </div>
-          <div v-if="card.sub" class="text-xs mt-2" style="color: var(--ui-text-dimmed)">{{ card.sub }}</div>
-        </div>
+          <div v-if="card.sub" class="text-xs mt-2 text-[var(--ui-text-dimmed)]">{{ card.sub }}</div>
+        </UCard>
       </div>
 
       <!-- Trend Chart -->
-      <div
-        class="rounded-xl p-4 md:p-6"
-        style="background: var(--ui-bg-elevated); border: 1px solid var(--ui-border)"
-      >
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-semibold" style="color: var(--ui-text)">浏览趋势</h2>
-          <div class="flex items-center gap-4 text-xs" style="color: var(--ui-text-muted)">
-            <span class="flex items-center gap-1.5">
-              <span class="inline-block w-4 h-0.5 rounded-full" :style="{ background: primaryHex }" /> 总浏览
-            </span>
-            <span class="flex items-center gap-1.5">
-              <span class="inline-block w-4 h-0.5 rounded-full bg-emerald-500" style="border-top: 2px dashed" /> 独立访客
-            </span>
+      <UCard>
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-semibold text-[var(--ui-text)]">浏览趋势</h2>
+            <div class="flex items-center gap-4 text-xs text-[var(--ui-text-muted)]">
+              <span class="flex items-center gap-1.5">
+                <span class="inline-block w-4 h-0.5 rounded-full" :style="{ background: primaryHex }" /> 总浏览
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="inline-block w-4 h-0.5 rounded-full bg-emerald-500" style="border-top: 2px dashed" /> 独立访客
+              </span>
+            </div>
           </div>
-        </div>
+        </template>
 
         <div v-if="chartData.length > 1" class="relative">
           <!-- Y axis labels -->
@@ -406,14 +384,13 @@ onMounted(() => fetchStats())
         <div v-else class="flex items-center justify-center text-sm" style="height: 220px; color: var(--ui-text-muted)">
           暂无浏览数据
         </div>
-      </div>
+      </UCard>
 
       <!-- Top Posts -->
-      <div
-        class="rounded-xl p-4 md:p-6"
-        style="background: var(--ui-bg-elevated); border: 1px solid var(--ui-border)"
-      >
-        <h2 class="text-base font-semibold mb-4" style="color: var(--ui-text)">热门文章 Top 10</h2>
+      <UCard>
+        <template #header>
+          <h2 class="text-base font-semibold text-[var(--ui-text)]">热门文章 Top 10</h2>
+        </template>
 
         <div v-if="topPosts.length" class="space-y-2.5">
           <a
@@ -424,16 +401,13 @@ onMounted(() => fetchStats())
             style="color: var(--ui-text)"
           >
             <!-- Rank -->
-            <span
-              :class="[
-                'size-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
-                idx < 3 ? 'text-white' : '',
-              ]"
-              :style="{
-                background: idx === 0 ? '#f59e0b' : idx === 1 ? '#94a3b8' : idx === 2 ? '#cd7c2f' : 'var(--ui-bg-accented)',
-                color: idx >= 3 ? 'var(--ui-text-muted)' : undefined,
-              }"
-            >{{ idx + 1 }}</span>
+            <UBadge
+              :color="idx < 3 ? 'primary' : 'neutral'"
+              :variant="idx < 3 ? 'solid' : 'subtle'"
+              class="size-7 justify-center rounded-full text-xs font-bold"
+            >
+              {{ idx + 1 }}
+            </UBadge>
 
             <!-- Title + bar -->
             <div class="flex-1 min-w-0">
@@ -461,7 +435,7 @@ onMounted(() => fetchStats())
         <div v-else class="flex items-center justify-center h-32 text-sm" style="color: var(--ui-text-muted)">
           暂无浏览数据
         </div>
-      </div>
+      </UCard>
     </template>
   </div>
 </template>

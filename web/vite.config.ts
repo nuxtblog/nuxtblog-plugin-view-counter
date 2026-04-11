@@ -11,10 +11,11 @@ export default defineConfig({
       fileName: (_format, entryName) => `${entryName}.mjs`,
     },
     rollupOptions: {
-      external: ['vue'],
+      external: ['vue', '@nuxtblog/ui'],
       output: {
         paths: {
           vue: '/_shared/vue.mjs',
+          '@nuxtblog/ui': '/_shared/ui.mjs',
         },
       },
     },
