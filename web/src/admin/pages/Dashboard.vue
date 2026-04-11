@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 
+const themeTokens = (window as any).__nuxtblog_theme
+const primaryHex = computed(() => themeTokens?.primaryHex || '#8b5cf6')
+/** Read a CSS var with fallback */
+function cssVar(name: string, fallback: string): string {
+  return themeTokens?.getCssVar?.(name) || fallback
+}
+
 const loading = ref(true)
 const error = ref<string | null>(null)
 const days = ref(30)
@@ -31,30 +38,30 @@ const statCards = computed(() => [
   {
     label: '总浏览量',
     value: totalViews.value,
-    color: '#3b82f6',
-    bg: 'rgba(59,130,246,0.1)',
+    color: primaryHex.value,
+    bg: primaryHex.value + '1a',
     iconPath: 'M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z',
     sub: days.value + ' 天内',
   },
   {
     label: '今日浏览',
     value: todayViews.value,
-    color: '#10b981',
-    bg: 'rgba(16,185,129,0.1)',
+    color: cssVar('--color-primary-400', '#10b981'),
+    bg: cssVar('--color-primary-400', '#10b981') + '1a',
     iconPath: 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z',
   },
   {
     label: '日均浏览',
     value: avgDaily.value,
-    color: '#8b5cf6',
-    bg: 'rgba(139,92,246,0.1)',
+    color: cssVar('--color-primary-600', '#8b5cf6'),
+    bg: cssVar('--color-primary-600', '#8b5cf6') + '1a',
     iconPath: 'M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941',
   },
   {
     label: '日志记录',
     value: stats.value?.total_logs || 0,
-    color: '#f59e0b',
-    bg: 'rgba(245,158,11,0.1)',
+    color: cssVar('--color-primary-800', '#f59e0b'),
+    bg: cssVar('--color-primary-800', '#f59e0b') + '1a',
     iconPath: 'M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125',
   },
 ])
@@ -291,7 +298,7 @@ onMounted(() => fetchStats())
           <h2 class="text-base font-semibold" style="color: var(--ui-text)">浏览趋势</h2>
           <div class="flex items-center gap-4 text-xs" style="color: var(--ui-text-muted)">
             <span class="flex items-center gap-1.5">
-              <span class="inline-block w-4 h-0.5 rounded-full bg-blue-500" /> 总浏览
+              <span class="inline-block w-4 h-0.5 rounded-full" :style="{ background: primaryHex }" /> 总浏览
             </span>
             <span class="flex items-center gap-1.5">
               <span class="inline-block w-4 h-0.5 rounded-full bg-emerald-500" style="border-top: 2px dashed" /> 独立访客
@@ -327,8 +334,8 @@ onMounted(() => fetchStats())
               <!-- Area gradient -->
               <defs>
                 <linearGradient id="vcAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2" />
-                  <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.01" />
+                  <stop offset="0%" :stop-color="primaryHex" stop-opacity="0.2" />
+                  <stop offset="100%" :stop-color="primaryHex" stop-opacity="0.01" />
                 </linearGradient>
               </defs>
               <polygon :points="areaPoints" fill="url(#vcAreaGrad)" />
@@ -337,7 +344,7 @@ onMounted(() => fetchStats())
               <polyline
                 :points="linePoints"
                 fill="none"
-                stroke="#3b82f6"
+                :stroke="primaryHex"
                 stroke-width="2.5"
                 stroke-linejoin="round"
                 stroke-linecap="round"
@@ -370,7 +377,7 @@ onMounted(() => fetchStats())
                   :cx="pt.x"
                   :cy="pt.y"
                   r="4"
-                  fill="#3b82f6"
+                  :fill="primaryHex"
                   stroke="white"
                   stroke-width="2"
                 />
